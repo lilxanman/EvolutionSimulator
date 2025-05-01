@@ -902,6 +902,7 @@
 			coutUp();
 			LookForIntervalChange();
 			UpdateControlPanel();
+			sendGraphData();
 		}
 		function Draw(){
 			if(FIRSTFRAME){
@@ -931,6 +932,7 @@
 			
 			coutUp();
 			LookForIntervalChange();
+			sendGraphData();
 		}
 		function DrawFast(){
 			if(FIRSTFRAME){
@@ -946,6 +948,27 @@
 			count++;
 		}
 		//bryce sux
+// ---- Real-time graph broadcasting ----
+const graphChannel = new BroadcastChannel('sim-data');
+
+function sendGraphData() {
+  // Count food cells
+  let foodCount = 0;
+  for (let r = 0; r < NUM_OF_ROWS; r++) {
+    for (let c = 0; c < NUM_OF_COLUMNS; c++) {
+      if (grid[r][c].type === food) {
+        foodCount++;
+      }
+    }
+  }
+
+  graphChannel.postMessage({
+    iteration: count,
+    organismCount: organism.length,
+    foodCount: foodCount
+  });
+}
+
 	</script>
 </body>
 </html>

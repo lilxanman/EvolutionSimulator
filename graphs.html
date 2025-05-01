@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Simulation Graphs</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      background: #121D29;
+      color: white;
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    canvas {
+      background-color: #1E2A38;
+      padding: 20px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="organismChart" width="800" height="400"></canvas>
+
+  <script>
+    const ctx = document.getElementById('organismChart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: 'Organism Count',
+            data: [],
+            borderColor: 'red',
+            backgroundColor: 'rgba(255, 0, 0, 0.2)',
+            tension: 0.2,
+          },
+          {
+            label: 'Available Food',
+            data: [],
+            borderColor: 'green',
+            backgroundColor: 'rgba(0, 255, 0, 0.1)',
+            tension: 0.2,
+          }
+        ]
+      },
+      options: {
+        animation: false,
+        responsive: false,
+        scales: {
+          x: {
+            type: 'linear',
+            title: {
+              display: true,
+              text: 'Iterations'
+            },
+            ticks: { color: 'white' },
+            grid: { color: '#444' }
+          },
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Count'
+            },
+            ticks: { color: 'white' },
+            grid: { color: '#444' }
+          }
+        },
+        plugins: {
+          legend: {
+            labels: {
+              color: 'white'
+            }
+          }
+        }
+      }
+    });
+
+    const MAX_POINTS = 800;
+
+    const channel = new BroadcastChannel('sim-data');
+    channel.onmessage = (event) => {
+      const { iteration, organismCount, foodCount } = event.data;
+
+      chart.data.labels.push(iteration);
+      chart.data.datasets[0].data.push(organismCount); // red line
+      chart.data.datasets[1].data.push(foodCount);     // green line
+
+      if (chart.data.labels.length > MAX_POINTS) {
+        chart.data.labels.shift();
+        chart.data.datasets[0].data.shift();
+        chart.data.datasets[1].data.shift();
+      }
+
+      chart.update();
+    };
+  </script>
+</body>
+</html>
